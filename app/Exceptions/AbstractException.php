@@ -108,6 +108,16 @@ abstract class AbstractException extends \Exception
     }
 
     /**
+     * Get Exception Severity.
+     *
+     * @return string
+     */
+    public function getSeverity(): string
+    {
+        return $this->severity;
+    }
+
+    /**
      * Get Exception Default Error Message.
      *
      * @param bool $translate Defines if message will be translated.

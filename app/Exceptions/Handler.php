@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
@@ -50,15 +51,14 @@ class Handler extends ExceptionHandler
         });
     }
 
-
     /**
      * Render an exception into an HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  Throwable  $exception
-     * @return \Illuminate\Http\Response
+     * @param  Throwable  $e
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function render($request, Throwable $exception)
+    public function render($request, Throwable $e)
     {
         // sometimes we may need to get the exception message and always return a generic message to use
         // for example for internal server errors.
@@ -71,71 +71,84 @@ class Handler extends ExceptionHandler
             // get logger from container
             $logger = $this->container->make(LoggerInterface::class);
         } catch (Exception $ex) {
-            throw $exception;
+            throw $e;
         }
 
-        $error = [
-            'code' => 500,
-        ];
-
-        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+        if ($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
             $error['code'] = 404;
             $error['message'] = "Not found";
-        } elseif ($exception instanceof ModelNotFoundException) {
+            $error['severity'] = 'warning';
+        } elseif ($e instanceof ModelNotFoundException) {
             $error['code'] = 404;
             $error['message'] = "Not found";
-        } elseif ($exception instanceof  \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException) {
+            $error['severity'] = 'warning';
+        } elseif ($e instanceof  \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException) {
             // in case of basic authentication failure (used by telescope), pass the headers
-            $headers = $exception->getHeaders();
+            $headers = $e->getHeaders();
 
             $error['code'] = 401;
             $error['message'] = "Unauthorized";
-        } elseif ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+            $error['severity'] = 'warning';
+        } elseif ($e instanceof \Illuminate\Auth\AuthenticationException) {
             $error['code'] = 401;
             $error['message'] = "Unauthorized";
-        } elseif ($exception instanceof \Illuminate\Routing\Exceptions\InvalidSignatureException) {
+            $error['severity'] = 'warning';
+        } elseif ($e instanceof \Illuminate\Routing\Exceptions\InvalidSignatureException) {
             $error['code'] = 401;
             $error['message'] = "Unauthorized";
-        } elseif ($exception instanceof \Illuminate\Auth\Access\AuthorizationException) {
+            $error['severity'] = 'warning';
+        } elseif ($e instanceof \Illuminate\Auth\Access\AuthorizationException) {
             $error['code'] = 403;
             $error['message'] = "Forbidden";
-        } elseif ($exception instanceof \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException) {
+            $error['severity'] = 'critical';
+        } elseif ($e instanceof \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException) {
             $error['code'] = 403;
             $error['message'] = "Forbidden";
-        } elseif ($exception instanceof \Illuminate\Validation\ValidationException) {
+            $error['severity'] = 'critical';
+        } elseif ($e instanceof \Illuminate\Validation\ValidationException) {
             $error['code'] = 422;
             $error['message'] = 'Validation error';
-            $error['errors'] = $exception->errors();
-        } elseif ($exception instanceof MethodNotAllowedHttpException) {
+            $error['errors'] = $e->errors();
+            $error['severity'] = 'info';
+        } elseif ($e instanceof MethodNotAllowedHttpException) {
             $error['code'] = 405;
             $error['message'] = 'Method not allowed';
-        } elseif ($exception instanceof \Illuminate\Http\Exceptions\ThrottleRequestsException) {
+            $error['severity'] = 'warning';
+        } elseif ($e instanceof \Illuminate\Http\Exceptions\ThrottleRequestsException) {
             $error['code'] = 429;
             $error['message'] = 'Too many requests';
-        } elseif ($exception instanceof \App\Exceptions\InternalServerErrorException) {
-            $error['code'] = $exception->getHttpCode();
-            $devMessage = $exception->getExceptionMessage();
-            $error['message'] = $exception->getDefaultErrorMessage(true);
-        } elseif ($exception instanceof \App\Exceptions\AbstractException) {
-            $error['code'] = $exception->getHttpCode();
-            $error['message'] = $exception->getExceptionMessage();
+            $error['severity'] = 'warning';
+        } elseif ($e instanceof \App\Exceptions\InternalServerErrorException) {
+            $error['code'] = $e->getHttpCode();
+            $devMessage = $e->getExceptionMessage();
+            $error['message'] = $e->getDefaultErrorMessage(true);
+            $error['severity'] = $e->getSeverity();
+        } elseif ($e instanceof \App\Exceptions\AbstractException) {
+            $error['code'] = $e->getHttpCode();
+            $error['message'] = $e->getExceptionMessage();
+            $error['severity'] = $e->getSeverity();
 
             // check if exception has it's own errors.
-            $exceptionErrors = $exception->getExceptionErrors(true);
+            $exceptionErrors = $e->getExceptionErrors(true);
             if (null !== $exceptionErrors) {
                 $error['errors'] = $exceptionErrors;
             }
         } else {
             $error['code'] = 500;
             $error['message'] = "Unexpected error";
-            $error['errors'] = $exception->getMessage();
+            $error['severity'] = 'alert';
+            $error['errors'] = $e->getMessage();
         }
 
         // log error
         $logger->log(
+            $error['severity'],
             ($devMessage ?? $error['message']),
-            array_merge($this->context(), ['exception' => $exception], ['errors' => ($error['errors'] ?? [])]),
+            array_merge($this->context(), ['exception' => $e], ['errors' => ($error['errors'] ?? [])]),
         );
+
+        // no need to pass severity to client
+        unset($error['severity']);
 
         return new JsonResponse($error, $error['code'], $headers);
     }
