@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace App\Services;
 
-
 use App\Exceptions\EmailAlreadyExistsException;
 use App\Models\User;
 use App\Validators\UserValidation;
@@ -35,7 +34,7 @@ class UserService
     public function register(array $input): array
     {
         // data validation
-        $data = $this->userValidation->userRegister($input);
+        $data = $this->userValidation->register($input);
 
         // we need to lowercase email if exists, to validate uniqueness later
         if (!empty($input['email'])) {
@@ -88,7 +87,7 @@ class UserService
     public function login(array $input): array
     {
         // data validation
-        $data = $this->userValidation->userLogin($input);
+        $data = $this->userValidation->login($input);
 
         $data['email'] = \mb_convert_case($input['email'], MB_CASE_LOWER, 'UTF-8');
 
@@ -116,6 +115,18 @@ class UserService
     public function logout(User $user): void
     {
         $user->token()->revoke();
+    }
+
+    /**
+     * Get user role
+     *
+     * @param User $user
+     *
+     * @return string
+     */
+    public function getUserRole(User $user): string
+    {
+        return $user->role->name;
     }
 
     /**

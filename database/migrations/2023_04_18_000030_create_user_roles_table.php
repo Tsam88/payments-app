@@ -6,14 +6,14 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePaymentServiceProvidersTable extends Migration
+class CreateUserRolesTable extends Migration
 {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('payment_service_providers', function (Blueprint $table) {
+        Schema::create('user_roles', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->timestamps();
@@ -21,14 +21,14 @@ class CreatePaymentServiceProvidersTable extends Migration
 
         $now = Carbon::now();
 
-        DB::table('payment_service_providers')->insert([
+        DB::table('user_roles')->insert([
             [
-                'name' => 'stripe',
+                'name' => 'customer',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
-                'name' => 'everypay',
+                'name' => 'merchant',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -40,6 +40,6 @@ class CreatePaymentServiceProvidersTable extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payment_service_providers');
+        Schema::dropIfExists('user_roles');
     }
 };

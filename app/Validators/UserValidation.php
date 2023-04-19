@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace App\Validators;
 
+use App\Models\UserRole;
+
 class UserValidation extends AbstractValidation
 {
     /**
@@ -17,11 +19,6 @@ class UserValidation extends AbstractValidation
             'string',
             'max:255',
         ],
-        'surname' => [
-            'required',
-            'string',
-            'max:255',
-        ],
         'email' => [
             'required',
             'email',
@@ -30,18 +27,11 @@ class UserValidation extends AbstractValidation
         'password' => [
             'required',
             'string',
+            'min:8',
         ],
-        'phone_number' => [
-            'string',
-            'max:255',
-            'nullable',
-        ],
-        'token' => [
-            'string'
-        ],
-        'items_per_page' => [
+        'user_role_id' => [
+            'required',
             'integer',
-            'gt:0',
         ],
     ];
 
@@ -52,13 +42,16 @@ class UserValidation extends AbstractValidation
      *
      * @return array
      */
-    public function userRegister(array $input)
+    public function register(array $input)
     {
+        $userRoleIds = UserRole::pluck('id')->toArray();
+
         // build the rules for register
         $validationRules = [
             'name' => $this->getRule(self::VALIDATION_RULES, 'name', []),
             'email' => $this->getRule(self::VALIDATION_RULES, 'email', []),
-            'password' => $this->getRule(self::VALIDATION_RULES, 'password', ['min:8']),
+            'password' => $this->getRule(self::VALIDATION_RULES, 'password', []),
+            'user_role_id' => $this->getRule(self::VALIDATION_RULES, 'user_role_id', ['in:'.implode(',', $userRoleIds)]),
         ];
 
         $validator = $this->getValidator($input, $validationRules);
@@ -74,7 +67,7 @@ class UserValidation extends AbstractValidation
      *
      * @return array
      */
-    public function userLogin(array $input)
+    public function login(array $input)
     {
         // build the rules for login
         $validationRules = [
