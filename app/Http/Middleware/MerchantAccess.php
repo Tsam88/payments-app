@@ -10,18 +10,28 @@ use Illuminate\Auth\Access\AuthorizationException;
 class MerchantAccess
 {
     /**
+     * @var UserService
+     */
+    private $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
+    /**
      * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request $request
      * @param  \Closure $next
-     * @param  UserService $userService
+     *
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function handle($request, Closure $next, UserService $userService)
+    public function handle($request, Closure $next)
     {
         $user = $request->user();
 
-        $userRole = $userService->getUserRole($user);
+        $userRole = $this->userService->getUserRole($user);
 
         if ($userRole !== UserRole::MERCHANT) {
             throw new AuthorizationException();

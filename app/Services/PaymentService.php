@@ -16,6 +16,7 @@ class PaymentService
      * @var PaymentValidation
      */
     private $paymentValidation;
+
     /**
      * @var PaymentContract
      */

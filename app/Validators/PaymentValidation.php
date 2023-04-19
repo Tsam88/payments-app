@@ -4,8 +4,6 @@ declare(strict_types = 1);
 
 namespace App\Validators;
 
-use App\Models\UserRole;
-
 class PaymentValidation extends AbstractValidation
 {
     /**
@@ -45,7 +43,7 @@ class PaymentValidation extends AbstractValidation
     ];
 
     /**
-     * User register validation.
+     * Create payment validation.
      *
      * @param array $input
      *
@@ -53,8 +51,6 @@ class PaymentValidation extends AbstractValidation
      */
     public function createPayment(array $input)
     {
-        $userRoleIds = UserRole::pluck('id')->toArray();
-
         // build the rules for register
         $validationRules = [
             'card' => $this->getRule(self::VALIDATION_RULES, 'card', []),

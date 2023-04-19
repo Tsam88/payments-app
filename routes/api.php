@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MerchantSettingsController;
 use App\Http\Controllers\PaymentController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,32 +16,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//Route::post('users/register', 'AuthController@register')->name('users.register');
-
 Route::post('users/register', [AuthController::class, 'register'])->name('users.register');
 Route::post('users/login', [AuthController::class, 'login'])->name('users.login');
-Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('users.verify');
-
-
-
-
-//Route::get('/user', function (Request $request) {
-//    return $request->user();
-//});
-
-
-Route::group(['middleware' => ['auth:sanctum', 'merchant.access']], function () {
-
-
-});
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('payments/create/{merchant}', [PaymentController::class, 'createPayment'])->name('payments.create');
 
-});
-
-
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    Route::group(['middleware' => ['merchant.access']], function () {
+        Route::patch('merchant-settings/update/{merchantSettings}', [MerchantSettingsController::class, 'update'])->name('merchant-settings.update');
+    });
 });

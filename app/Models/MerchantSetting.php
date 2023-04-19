@@ -13,8 +13,8 @@ class MerchantSetting extends Model
      * {@inheritDoc}
      */
     protected $fillable = [
+        'merchant_id',
         'psp_api_key',
-        'user_id',
         'payment_service_provider_id',
     ];
 

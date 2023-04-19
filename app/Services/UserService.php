@@ -5,7 +5,10 @@ declare(strict_types = 1);
 namespace App\Services;
 
 use App\Exceptions\EmailAlreadyExistsException;
+use App\Models\Merchant;
+use App\Models\MerchantSetting;
 use App\Models\User;
+use App\Models\UserRole;
 use App\Validators\UserValidation;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Events\Registered;
@@ -52,7 +55,20 @@ class UserService
         try {
             $data['password'] = bcrypt($data['password']);
 
-            $user = User::create($data);
+            $userRole = UserRole::where('id', $data['user_role_id'])->first();
+
+            // if new user is merchant, then create merchant settings
+            if ($userRole->name === UserRole::MERCHANT) {
+                $user = Merchant::create($data);
+
+                MerchantSetting::create([
+                    'merchant_id' => $user->id,
+                    'psp_api_key' => $data['merchant_settings']['psp_api_key'],
+                    'payment_service_provider_id' => $data['merchant_settings']['payment_service_provider_id'],
+                ]);
+            } else {
+                $user = User::create($data);
+            }
 
             event(new Registered($user));
 
@@ -126,7 +142,7 @@ class UserService
      */
     public function getUserRole(User $user): string
     {
-        return $user->role->name;
+        return $user->userRole->name;
     }
 
     /**
