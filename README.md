@@ -1,66 +1,93 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## Install PaymentApp
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+- Open a terminal in the desired directory where you would like to clone the project
+- Run the command 'git clone https://github.com/Tsam88/payments-app.git'
+- Run 'cd payments-app/'
+- Copy the .env.example to .env (cp .env.example .env)
+- In the .env file replace the DB variables:
+  - DB_CONNECTION=mysql 
+  - DB_HOST=payments-db
+  - DB_PORT=3306
+  - DB_DATABASE=payments
+  - DB_USERNAME=root
+  - DB_PASSWORD=payments
+- In the .env file the two variables (DOCKER_USER=www, DOCKER_USER_ID=1000) point at the variables (user, uid) in the Dockerfile file. You may have to change them accordingly if you are not logged-in as root user
+- In the '/payments-app' directory build and start docker containers running the commands:
+  - docker-compose build
+  - docker-compose up -d
+- Get into the payments-app container running the command 'docker exec -it payments-app bash'
+- And into the container run the commands below:
+  - php artisan key:generate
+  - composer install
+  - php artisan migrate
 
-## About Laravel
+NOTE: Running the migrations, two Users with Merchant role are created. 
+Their Api Keys (for sandbox accounts (Stripe and Everypay)) have been already set in the merchants_settings table in the DB. 
+You can log in using the credentials below:
+- stripe.merchant@test.com::test1234
+- everypay.merchant@test.com::test1234
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Api End Points and Payloads
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Register (The app supports two different user roles, Customer and Merchant)
+- Register a Customer
+  - POST /users/register
+  -     {
+            "name": "customer",
+            "email": "customer@test.gr",
+            "password": "test1234",
+            "user_role_id": 1
+        }
+  - user_role_id: indicates the id of the available user roles in the table user_roles in the DB
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+- Register a Merchant
+  - POST /users/register
+  -     {
+            "name": "merchant",
+            "email": "merchant@test.gr",
+            "password": "test1234",
+            "user_role_id": 2,
+            "merchant_settings": {
+                 "psp_api_key": "sk_iJOL1iWlKDylHRjCxnBenXN7wGfZjw48",
+                 "payment_service_provider_id": 2,
+            },
+        }
+  - user_role_id: indicates the id of the available user roles in the table user_roles in the DB
+  - payment_service_provider_id: indicates the id of the available Payment Service Providers in the table payment_service_providers in the DB
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- Login
+  - POST /users/login
+  -     {
+            "email": "everypay.merchant@test.com",
+            "password": "test1234"
+        }
+    Note: The app uses Bearer token as authentication type. So the token that is returned can be used for the end points that require authorization.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+    
+- Logout
+  - POST /users/logout
 
-## Laravel Sponsors
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+- Update Merchant's PSP method and ApiKey
+  - PATCH /merchant-settings/update/{merchantSettingsId}
+  -     {
+            "payment_service_provider_id": 1,
+            "psp_api_key": "sk_iJOL1iWlKDylHRjCxnBenXN7wGfZjw48",
+        }
+  - payment_service_provider_id: indicates the id of the available Payment Service Providers in the table payment_service_providers in the DB
+  - psp_api_key: Payment Service Provider's Api Key
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- Create a payment
+  - POST /payments/create/{merchantId}
+  -     {
+            "card": {
+                 "card_number": "4111111111111111",
+                 "expiration_date": "12/2023",
+                 "cvv": 123,
+                 "cardholder_name": "John Doe"
+            },
+            "amount": 1.5
+        }
