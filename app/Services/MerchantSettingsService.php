@@ -22,7 +22,8 @@ class MerchantSettingsService
     /**
      * Update merchant settings
      *
-     * @param int $pspId
+     * @param array           $input
+     * @param MerchantSetting $merchantSettings
      *
      * @return void
      */

@@ -130,19 +130,11 @@ class UserService
      */
     public function logout(User $user): void
     {
-        $user->token()->revoke();
-    }
-
-    /**
-     * Get user role
-     *
-     * @param User $user
-     *
-     * @return string
-     */
-    public function getUserRole(User $user): string
-    {
-        return $user->userRole->name;
+        try {
+            $user->currentAccessToken()->delete();
+        } catch (\Exception $e) {
+            // do nothing
+        }
     }
 
     /**

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MerchantSettingsController;
 use App\Http\Controllers\PaymentController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,6 +21,7 @@ Route::post('users/register', [AuthController::class, 'register'])->name('users.
 Route::post('users/login', [AuthController::class, 'login'])->name('users.login');
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::post('users/logout', [AuthController::class, 'logout'])->name('users.logout');
     Route::post('payments/create/{merchant}', [PaymentController::class, 'createPayment'])->name('payments.create');
 
     Route::group(['middleware' => ['merchant.access']], function () {

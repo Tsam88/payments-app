@@ -4,12 +4,13 @@ declare(strict_types = 1);
 
 namespace App\Clients;
 
+use App\Contracts\PaymentContract;
 use App\Models\Merchant;
 use App\Models\User;
 use Stripe\Charge;
 use Stripe\Stripe;
 
-class StripePaymentClient extends PaymentClient
+class StripePaymentClient implements PaymentContract
 {
     /**
      * Create a payment
@@ -27,8 +28,6 @@ class StripePaymentClient extends PaymentClient
 
         // create a charge
         $this->charge($input);
-
-        var_dump('STRIPE');
     }
 
     /**

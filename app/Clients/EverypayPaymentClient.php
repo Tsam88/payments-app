@@ -4,13 +4,14 @@ declare(strict_types = 1);
 
 namespace App\Clients;
 
+use App\Contracts\PaymentContract;
 use App\Exceptions\EverypayException;
 use App\Models\Merchant;
 use App\Models\User;
 use Everypay\Everypay;
 use Everypay\Payment;
 
-class EverypayPaymentClient extends PaymentClient
+class EverypayPaymentClient implements PaymentContract
 {
     /**
      * Create a payment
@@ -35,8 +36,6 @@ class EverypayPaymentClient extends PaymentClient
 
         // create a charge
         $this->charge($input);
-
-        var_dump('EVERYPAY');
     }
 
     /**

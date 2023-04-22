@@ -31,9 +31,7 @@ class MerchantAccess
     {
         $user = $request->user();
 
-        $userRole = $this->userService->getUserRole($user);
-
-        if ($userRole !== UserRole::MERCHANT) {
+        if ($user->userRole->name !== UserRole::MERCHANT) {
             throw new AuthorizationException();
         }
 
