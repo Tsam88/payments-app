@@ -1,5 +1,9 @@
 FROM php:8.1-fpm
 
+# Arguments defined in docker-compose.yml
+ARG user
+ARG uid
+
 # Copy composer.lock and composer.json
 COPY composer.lock composer.json /var/www/
 
@@ -33,7 +37,7 @@ RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl
 #RUN apt-get --yes install libfreetype6-dev \
 #                          libjpeg62-turbo-dev \
 #                          libpng-dev \
-#                          libwebp-dev 
+#                          libwebp-dev
 
 #RUN docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ --with-png=/usr/include/
 RUN set -e; \
@@ -46,17 +50,17 @@ RUN set -e; \
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Add user for laravel application
-RUN groupadd -g 1001 chtsiamouras
-RUN useradd -u 1001 -ms /bin/bash -g chtsiamouras chtsiamouras
+RUN groupadd -g $uid $user
+RUN useradd -u $uid -ms /bin/bash -g $user $user
 
 # Copy existing application directory contents
 COPY . /var/www
 
 # Copy existing application directory permissions
-COPY --chown=chtsiamouras:chtsiamouras . /var/www
+COPY --chown=$user:$user . /var/www
 
 # Change current user to www
-USER chtsiamouras
+USER $user
 
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000

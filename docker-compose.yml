@@ -1,9 +1,12 @@
 version: '3'
 services:
-  
+
   #PHP Service
   app:
     build:
+      args:
+        user: ${DOCKER_USER}
+        uid: ${DOCKER_USER_ID}
       context: .
       dockerfile: Dockerfile
     image: digitalocean.com/php
