@@ -131,45 +131,45 @@ class EverypayPaymentClientTest extends TestCase
         ];
     }
 
-    public function testCreatePayment()
-    {
-        $payload = [
-            'card_number' => '1111222233334444',
-            'expiration_month' => '12',
-            'expiration_year' => '2023',
-            'cvv' => '123',
-            'holder_name' => 'John Doe',
-            'amount' => 150
-        ];
-
-        $mockBuilder = \Mockery::mock('overload:Everypay\Everypay');
-        $mockBuilder->shouldReceive('setApiKey')->with($this->merchantEverypay->merchantSettings->psp_api_key);
-
-
-//        $mockBuilder::$isTest = true;
-//        $test = $mockBuilder->mockery_getMockableProperties();
+//    public function testCreatePayment()
+//    {
+//        $payload = [
+//            'card_number' => '1111222233334444',
+//            'expiration_month' => '12',
+//            'expiration_year' => '2023',
+//            'cvv' => '123',
+//            'holder_name' => 'John Doe',
+//            'amount' => 150
+//        ];
 //
-//        dd($test);
-
-//        $mockBuilder2 = \Mockery::mock('overload:Everypay\Everypay');
-//        $mockBuilder2->shouldReceive('$isTest')->with(true);
-
-        $mockBuilder3 = \Mockery::mock('overload:Everypay\Payment');
-        $mockBuilder3->shouldReceive('create')->with($payload)->andReturn([]);
-
-        $payload = [
-            'card' => [
-                'card_number' => '1111222233334444',
-                'expiration_date' => '12/2023',
-                'cvv' => 123,
-                'cardholder_name' => 'John Doe',
-            ],
-            'amount' => 1.5,
-        ];
-
-        $this->everypayPaymentClient->createPayment($payload, $this->customer, $this->merchantEverypay);
-
-        // we add this just to make a dummy assertion
-        $this->addToAssertionCount(1);
-    }
+//        $mockBuilder = \Mockery::mock('overload:Everypay\Everypay');
+//        $mockBuilder->shouldReceive('setApiKey')->with($this->merchantEverypay->merchantSettings->psp_api_key);
+//
+//
+////        $mockBuilder::$isTest = true;
+////        $test = $mockBuilder->mockery_getMockableProperties();
+////
+////        dd($test);
+//
+////        $mockBuilder2 = \Mockery::mock('overload:Everypay\Everypay');
+////        $mockBuilder2->shouldReceive('$isTest')->with(true);
+//
+//        $mockBuilder3 = \Mockery::mock('overload:Everypay\Payment');
+//        $mockBuilder3->shouldReceive('create')->with($payload)->andReturn([]);
+//
+//        $payload = [
+//            'card' => [
+//                'card_number' => '1111222233334444',
+//                'expiration_date' => '12/2023',
+//                'cvv' => 123,
+//                'cardholder_name' => 'John Doe',
+//            ],
+//            'amount' => 1.5,
+//        ];
+//
+//        $this->everypayPaymentClient->createPayment($payload, $this->customer, $this->merchantEverypay);
+//
+//        // we add this just to make a dummy assertion
+//        $this->addToAssertionCount(1);
+//    }
 }

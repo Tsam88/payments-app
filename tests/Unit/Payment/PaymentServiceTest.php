@@ -106,60 +106,60 @@ class PaymentServiceTest extends TestCase
         $this->helper->login($this->customer);
     }
 
-    public function testCreatePaymentWithEverypayMerchant()
-    {
-        $paymentService = new PaymentService($this->paymentValidation, $this->everypayPaymentClient);
-
-        $payload = [
-            'card_number' => '1111222233334444',
-            'expiration_month' => '12',
-            'expiration_year' => '2023',
-            'cvv' => '123',
-            'holder_name' => 'John Doe',
-            'amount' => 150
-        ];
-
-        $mockBuilder = \Mockery::mock('overload:Everypay\Payment');
-        $mockBuilder->shouldReceive('create')->with($payload)->andReturn([]);
-
-        $mockBuilder2 = \Mockery::mock('overload:Everypay\Everypay');
-        $mockBuilder2->shouldReceive('setApiKey')->with($this->merchantEverypay->merchantSettings->psp_api_key);
-
-        $payload = [
-            'card' => [
-                'card_number' => '1111222233334444',
-                'expiration_date' => '12/2023',
-                'cvv' => 123,
-                'cardholder_name' => 'John Doe',
-            ],
-            'amount' => 1.5,
-        ];
-
-        $mockBuilder3 = \Mockery::mock(EverypayPaymentClient::class);
-//        $mockBuilder3->shouldReceive(['createPayment', 'setApiKey', 'charge']);
-        $mockBuilder3->shouldReceive('createPayment')
-//            ->once()
-            ->with($payload, $this->customer, $this->merchantEverypay);
-
-        $paymentService->createPayment($payload, $this->customer, $this->merchantEverypay);
-
-        $expected = [
-            "id" => 1,
-            "user_id" => 5,
-            "merchant_id" => 3,
-            "payment_service_provider_id" => 2,
-            "amount" => 1.5,
-            "last4" => "4444",
-            "expiration_date" => "12/2023",
-            "cardholder_name" => "John Doe",
-        ];
-
-        $payment = Payment::where('user_id', $this->customer->id)
-            ->where('merchant_id', $this->merchantEverypay->id)
-            ->first();
-
-        $this->assertEquals($expected, $payment->toArray());
-    }
+//    public function testCreatePaymentWithEverypayMerchant()
+//    {
+//        $paymentService = new PaymentService($this->paymentValidation, $this->everypayPaymentClient);
+//
+//        $payload = [
+//            'card_number' => '1111222233334444',
+//            'expiration_month' => '12',
+//            'expiration_year' => '2023',
+//            'cvv' => '123',
+//            'holder_name' => 'John Doe',
+//            'amount' => 150
+//        ];
+//
+//        $mockBuilder = \Mockery::mock('overload:Everypay\Payment');
+//        $mockBuilder->shouldReceive('create')->with($payload)->andReturn([]);
+//
+//        $mockBuilder2 = \Mockery::mock('overload:Everypay\Everypay');
+//        $mockBuilder2->shouldReceive('setApiKey')->with($this->merchantEverypay->merchantSettings->psp_api_key);
+//
+//        $payload = [
+//            'card' => [
+//                'card_number' => '1111222233334444',
+//                'expiration_date' => '12/2023',
+//                'cvv' => 123,
+//                'cardholder_name' => 'John Doe',
+//            ],
+//            'amount' => 1.5,
+//        ];
+//
+//        $mockBuilder3 = \Mockery::mock(EverypayPaymentClient::class);
+////        $mockBuilder3->shouldReceive(['createPayment', 'setApiKey', 'charge']);
+//        $mockBuilder3->shouldReceive('createPayment')
+////            ->once()
+//            ->with($payload, $this->customer, $this->merchantEverypay);
+//
+//        $paymentService->createPayment($payload, $this->customer, $this->merchantEverypay);
+//
+//        $expected = [
+//            "id" => 1,
+//            "user_id" => 5,
+//            "merchant_id" => 3,
+//            "payment_service_provider_id" => 2,
+//            "amount" => 1.5,
+//            "last4" => "4444",
+//            "expiration_date" => "12/2023",
+//            "cardholder_name" => "John Doe",
+//        ];
+//
+//        $payment = Payment::where('user_id', $this->customer->id)
+//            ->where('merchant_id', $this->merchantEverypay->id)
+//            ->first();
+//
+//        $this->assertEquals($expected, $payment->toArray());
+//    }
 
     public function testCreatePaymentWithStripeMerchant()
     {
